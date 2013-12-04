@@ -32,6 +32,11 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
 
         private string m_username = "";
         private string m_password = "";
+
+        private SpreadOrder m_order;
+        private SpreadLeg m_leg1;
+        private SpreadLeg m_leg2;
+
         //Spread variables
         private string  m_ASEGateway = "AlgoSE";
         private string  m_SpreadName = "TestSpread";
@@ -70,10 +75,39 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         /// <summary>
         /// Primary constructor
         /// </summary>
-        public TTAPIFunctions(string u, string p)
+        public TTAPIFunctions(string u, string p, SpreadOrder so, SpreadLeg sl1, SpreadLeg sl2)
         {
             m_username = u;
             m_password = p;
+            m_order = so;
+            m_leg1 = sl1;
+            m_leg2 = sl2;
+
+            m_ASEGateway = so.Server;
+            m_SpreadName = so.Name;
+            m_BS = so.Side;
+            m_QTY = so.Quantity;
+            m_SpreadPrice = so.Price;
+
+            m_mk1 = sl1.Market;
+            m_Product1 = sl1.Product;
+            m_pt1 = sl1.Type;
+            m_Contract1 = sl1.Contract;
+            m_Customer1 = sl1.Customer;
+            m_Ratio1 = sl1.Ratio;
+            m_Mult1 = sl1.Multiplier;
+            m_AQ1 = sl1.ActiveQuoting;
+
+            m_mk2 = sl2.Market;
+            m_Product2 = sl2.Product;
+            m_pt2 = sl2.Type;
+            m_Contract2 = sl2.Contract;
+            m_Customer2 = sl2.Customer;
+            m_Ratio2 = sl2.Ratio;
+            m_Mult2 = sl2.Multiplier;
+            m_AQ2 = sl2.ActiveQuoting;
+
+            Console.WriteLine("Data Populated");
         }
 
         /// <summary>
@@ -197,6 +231,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
             {
                 // Instrument was not found and TT API has given up looking for it
                 Console.WriteLine("Cannot find instrument: {0}", e.Error.Message);
+                Console.ReadKey();
                 Dispose();
             }
 
@@ -223,6 +258,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                         spreadlegDetails.CustomerName = m_Customer1;
                         spreadlegDetails.ActiveQuoting = m_AQ1;
                         spreadDetails.Legs.Append(spreadlegDetails);
+                        Console.WriteLine("Added Leg 1"); 
                     }
                     else if (m_spreadLegKeys[2].Equals(instrument))
                     {
@@ -231,6 +267,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                         spreadlegDetails.CustomerName = m_Customer2;
                         spreadlegDetails.ActiveQuoting = m_AQ2;
                         spreadDetails.Legs.Append(spreadlegDetails);
+                        Console.WriteLine("Added Leg 2");
                     }
                 }
 
@@ -250,9 +287,11 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
             {
                 if (e.Instrument != null)
                 {
+                    Console.WriteLine("Synthetic Spread creation completed");
                     // In this example, the AutospreaderInstrument is launched to ASE-A.
                     // You should use the order feed that is appropriate for your purposes.
                     OrderFeed oFeed = this.GetOrderFeedByName(e.Instrument, m_ASEGateway);
+                    Console.WriteLine("OrderFeed: {0} Trading Enabled: {1}", oFeed.Name, oFeed.IsTradingEnabled);   
                     if (oFeed != null && oFeed.IsTradingEnabled)
                     {
                         // deploy the Autospreader Instrument to the specified ASE
@@ -262,6 +301,8 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                         {
                             Console.WriteLine("Launch request was unsuccessful");
                         }
+                        else
+                        { Console.WriteLine(lrc.ToString()); }
                     }
                     else
                     { Console.WriteLine("Orderfeed {0} invalid", oFeed.Market.Name); }
@@ -328,51 +369,32 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         {
             if (e.Error == null)
             {
-                // Make sure that there is a valid bid
-                if (e.Fields.GetBestBidPriceField().HasValidValue)
+
+                if (m_orderKey == "")
                 {
-                    if (m_orderKey == "")
-                    {
-                        // In this example, the order is submitted to ASE-A.
-                        // You should use the order feed that is appropriate for your purposes.
-                        AutospreaderSyntheticOrderProfile op = new AutospreaderSyntheticOrderProfile(this.GetOrderFeedByName(e.Fields.Instrument, m_ASEGateway),
-                            (AutospreaderInstrument)e.Fields.Instrument);
-                        op.BuySell = m_BS;
-                        op.OrderQuantity = Quantity.FromInt(e.Fields.Instrument, m_QTY);
-                        op.OrderType = OrderType.Limit;
-                        op.LimitPrice = Price.FromDouble(e.Fields.Instrument, m_SpreadPrice);
+                    // In this example, the order is submitted to ASE-A.
+                    // You should use the order feed that is appropriate for your purposes.
+                    AutospreaderSyntheticOrderProfile op = new AutospreaderSyntheticOrderProfile(this.GetOrderFeedByName(e.Fields.Instrument, m_ASEGateway),
+                        (AutospreaderInstrument)e.Fields.Instrument);
+                    op.BuySell = m_BS;
+                    op.OrderQuantity = Quantity.FromInt(e.Fields.Instrument, m_QTY);
+                    op.OrderType = OrderType.Limit;
+                    op.LimitPrice = Price.FromDouble(e.Fields.Instrument, m_SpreadPrice);
                         
 
-                        if (!m_ts.SendOrder(op))
-                        {
-                            Console.WriteLine("Send new order failed.  {0}", op.RoutingStatus.Message);
-                        }
-                        else
-                        {
-                            m_orderKey = op.SiteOrderKey;
-                            Console.WriteLine("Send new order succeeded.");
-
-
-                        }
+                    if (!m_ts.SendOrder(op))
+                    {
+                        Console.WriteLine("Send new order failed.  {0}", op.RoutingStatus.Message);
                     }
-                    //else if (m_ts.Orders.ContainsKey(m_orderKey) &&
-                    //    m_ts.Orders[m_orderKey].LimitPrice != e.Fields.GetBestBidPriceField().Value)
-                    //{
-                    //    // If there is a working order, reprice it if its price is not the same as the bid
-                    //    AutospreaderSyntheticOrderProfile op = m_ts.Orders[m_orderKey].GetOrderProfile() as AutospreaderSyntheticOrderProfile;
-                    //    op.LimitPrice = e.Fields.GetBestBidPriceField().Value;
-                    //    op.Action = OrderAction.Change;
+                    else
+                    {
+                        m_orderKey = op.SiteOrderKey;
+                        Console.WriteLine("Send new order succeeded. Order Key: {0}", m_orderKey );
 
-                    //    if (!m_ts.SendOrder(op))
-                    //    {
-                    //        Console.WriteLine("Send change order failed.  {0}", op.RoutingStatus.Message);
-                    //    }
-                    //    else
-                    //    {
-                    //        Console.WriteLine("Send change order succeeded.");
-                    //    }
-                    //}
+
+                    }
                 }
+     
             }
             else
             {
@@ -446,12 +468,12 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
             if (e.Order.SiteOrderKey == m_orderKey)
             {
                 // Our parent order has been added
-                Console.WriteLine("Our parent order has been added: {0}", e.Message);
+                Console.WriteLine(e.Message);
             }
             else if (e.Order.SyntheticOrderKey == m_orderKey)
             {
-                // A child order of our parent order has been added
-                Console.WriteLine("A child order of our parent order has been added: {0}", e.Message);
+                // "A child order of our parent order has been added: {0}",
+                Console.WriteLine(e.Message);
             }
         }
 
@@ -468,7 +490,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
             else if (e.OldOrder.SyntheticOrderKey == m_orderKey)
             {
                 // A child order of our parent order has been updated
-                Console.WriteLine("A child order of our parent order has been updated: {0}", e.Message);
+                //Console.WriteLine("A child order of our parent order has been updated: {0}", e.Message);
             }
         }
 
