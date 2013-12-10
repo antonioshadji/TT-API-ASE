@@ -15,9 +15,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
     /// </summary>
     class TTAPIFunctions : IDisposable
     {
-        /// <summary>
-        /// Declare the TTAPI objects
-        /// </summary>
+        #region Variables
         private UniversalLoginTTAPI m_apiInstance = null;
         private WorkerDispatcher m_disp = null;
         private bool m_disposed = false;
@@ -62,8 +60,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         private int     m_Ratio2 = -1;
         private double  m_Mult2 = -1;
         private bool    m_AQ2 = true;
-
-
+        #endregion
 
         /// <summary>
         /// Private default constructor
@@ -189,27 +186,6 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         }
 
         /// <summary>
-        /// Helper function that determines if all leg instruments have been found
-        /// </summary>
-        private bool HaveWeFoundAllLegs()
-        {
-            if (m_spreadLegKeys.Count == 0)
-            {
-                return false;
-            }
-
-            foreach (Instrument instrument in m_spreadLegKeys.Values)
-            {
-                if (instrument == null)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Event notification for instrument lookup
         /// </summary>
         void m_req_Update(object sender, InstrumentLookupSubscriptionEventArgs e)
@@ -291,9 +267,10 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                     // In this example, the AutospreaderInstrument is launched to ASE-A.
                     // You should use the order feed that is appropriate for your purposes.
                     OrderFeed oFeed = this.GetOrderFeedByName(e.Instrument, m_ASEGateway);
-                    Console.WriteLine("OrderFeed: {0} Trading Enabled: {1}", oFeed.Name, oFeed.IsTradingEnabled);   
+                   
                     if (oFeed != null && oFeed.IsTradingEnabled)
                     {
+                        Console.WriteLine("OrderFeed: {0} Trading Enabled: {1}", oFeed.Name, oFeed.IsTradingEnabled);   
                         // deploy the Autospreader Instrument to the specified ASE
                         e.Instrument.TradableStatusChanged += new EventHandler<TradableStatusChangedEventArgs>(Instrument_TradableStatusChanged);
                         LaunchReturnCode lrc = e.Instrument.LaunchToOrderFeed(oFeed);
@@ -302,7 +279,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                             Console.WriteLine("Launch request was unsuccessful");
                         }
                         else
-                        { Console.WriteLine(lrc.ToString()); }
+                        { Console.WriteLine("Launch Request was {0}", lrc); }
                     }
                     else
                     { Console.WriteLine("Orderfeed {0} invalid", oFeed.Market.Name); }
@@ -316,28 +293,13 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         }
 
         /// <summary>
-        /// Helper function for finding an OrderFeed given a gateway name
-        /// </summary>
-        OrderFeed GetOrderFeedByName(Instrument instr, string gateway)
-        {
-            foreach (OrderFeed oFeed in instr.GetValidOrderFeeds())
-            {
-                if (oFeed.Name.Equals(gateway))
-                {
-                    return oFeed;
-                }
-            }
-
-            return (OrderFeed)null;
-        }
-
-        /// <summary>
         /// Event notification for AutospreaderInstrument launch
         /// </summary>
         void Instrument_TradableStatusChanged(object sender, TradableStatusChangedEventArgs e)
         {
             if (e.Value)
             {
+                Console.WriteLine("Launch of AutospreaderInstrument to {0} was successful.", e.OrderFeed.Name);
                 // launch of AutospreaderInstrument was successful
                 AutospreaderInstrument instr = sender as AutospreaderInstrument;
 
@@ -389,9 +351,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                     else
                     {
                         m_orderKey = op.SiteOrderKey;
-                        Console.WriteLine("Send new order succeeded. Order Key: {0}", m_orderKey );
-
-
+                        Console.WriteLine("Send new order succeeded. Order Key: {0}", m_orderKey);
                     }
                 }
      
@@ -561,6 +521,42 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
             }
         }
 
+
+        /// <summary>
+        /// Helper function that determines if all leg instruments have been found
+        /// </summary>
+        private bool HaveWeFoundAllLegs()
+        {
+            if (m_spreadLegKeys.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (Instrument instrument in m_spreadLegKeys.Values)
+            {
+                if (instrument == null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Helper function for finding an OrderFeed given a gateway name
+        /// </summary>
+        OrderFeed GetOrderFeedByName(Instrument instr, string gateway)
+        {
+            foreach (OrderFeed oFeed in instr.GetValidOrderFeeds())
+            {
+                if (oFeed.Name.Equals(gateway))
+                {
+                    return oFeed;
+                }
+            }
+
+            return (OrderFeed)null;
+        }
         
     }
 }
