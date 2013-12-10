@@ -8,21 +8,21 @@ namespace TTAPI_Utility
     /// <summary>
     /// Utility to confirm that the compiler settings are compatible with the version of TT API installed
     /// </summary>
-    class TTAPIArchitectureCheck
+    public static class TTAPIArchitectureCheck
     {
-        public string ErrorString { get; private set; }
+        public static string ErrorString { get; private set; }
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        public TTAPIArchitectureCheck()
-        {
-        }
+        //public TTAPIArchitectureCheck()
+        //{
+        //}
 
         /// <summary>
         /// Verify the application build settings match the architecture of the TT API installed
         /// </summary>
-        public bool validate()
+        public static bool validate()
         {
             try
             {

@@ -63,9 +63,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
             }
 
             // Check that the compiler settings are compatible with the version of TT API installed
-            TTAPIArchitectureCheck archCheck = new TTAPIArchitectureCheck();
-
-            if (archCheck.validate())
+            if (TTAPIArchitectureCheck.validate())
             {
                 Console.WriteLine("Architecture check passed.");
 
@@ -94,7 +92,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
             }
             else
             {
-                Console.WriteLine("Architecture check failed.  {0}", archCheck.ErrorString);
+                Console.WriteLine("Architecture check failed.  {0}", TTAPIArchitectureCheck.ErrorString);
                 Console.WriteLine("Press any key to exit application");
                 Console.Read();
             }
