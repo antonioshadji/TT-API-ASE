@@ -23,6 +23,8 @@ using System.Threading;
 namespace TTAPI_Sample_Console_ASEOrderRouting
 {
     using TTAPI_Utility;
+    using TradingTechnologies.TTAPI;
+
 
     class Program
     {
@@ -30,6 +32,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         {
             string ttUserId = String.Empty;
             string ttPassword = String.Empty;
+        
 
             SpreadOrder order = new SpreadOrder();
             SpreadLeg leg1 = new SpreadLeg();

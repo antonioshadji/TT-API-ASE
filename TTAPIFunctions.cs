@@ -31,6 +31,12 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         private string m_username = "";
         private string m_password = "";
 
+        //TODO: replace custom spread class  
+        private SpreadDetails spread_order;
+        private SpreadLegDetails spread_legA;
+        private SpreadLegDetails spread_legB;
+
+
         private SpreadOrder m_order;
         private SpreadLeg m_leg1;
         private SpreadLeg m_leg2;
