@@ -22,7 +22,6 @@ using System.Threading;
 
 namespace TTAPI_Sample_Console_ASEOrderRouting
 {
-    using TTAPI_Utility;
     using TradingTechnologies.TTAPI;
 
 
@@ -65,11 +64,6 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                 
             }
 
-            // Check that the compiler settings are compatible with the version of TT API installed
-            if (TTAPIArchitectureCheck.validate())
-            {
-                Console.WriteLine("Architecture check passed.");
-
                 // Dictates whether TT API will be started on its own thread
                 bool startOnSeparateThread = false;
 
@@ -92,13 +86,8 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                         tf.Start();
                     }
                 }
-            }
-            else
-            {
-                Console.WriteLine("Architecture check failed.  {0}", TTAPIArchitectureCheck.ErrorString);
-                Console.WriteLine("Press any key to exit application");
-                Console.Read();
-            }
+            
+
         }
     }
 }

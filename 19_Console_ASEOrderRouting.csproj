@@ -87,7 +87,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpreadOrder.cs" />
-    <Compile Include="TTAPIArchitectureCheck.cs" />
     <Compile Include="TTAPIFunctions.cs" />
   </ItemGroup>
   <ItemGroup>
