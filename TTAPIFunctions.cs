@@ -130,21 +130,21 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
         public void Init()
         {
             // Use "Universal Login" Login Mode
-            TTAPI.UniversalLoginModeDelegate ulDelegate = new TTAPI.UniversalLoginModeDelegate(ttApiInitComplete);
-            TTAPI.CreateUniversalLoginTTAPI(Dispatcher.Current, ulDelegate);
+            ApiInitializeHandler d = new ApiInitializeHandler(ttApiInitHandler);
+            TTAPI.CreateUniversalLoginTTAPI(Dispatcher.Current, m_username, m_password, d);
         }
 
         /// <summary>
         /// Event notification for status of TT API initialization
         /// </summary>
-        public void ttApiInitComplete(UniversalLoginTTAPI api, Exception ex)
+        public void ttApiInitHandler(TTAPI api, ApiCreationException ex)
         {
             if (ex == null)
             {
                 // Authenticate your credentials
-                m_apiInstance = api;
+                m_apiInstance = (UniversalLoginTTAPI)api;
                 m_apiInstance.AuthenticationStatusUpdate += new EventHandler<AuthenticationStatusUpdateEventArgs>(apiInstance_AuthenticationStatusUpdate);
-                m_apiInstance.Authenticate(m_username, m_password);
+                m_apiInstance.Start();
             }
             else
             {
@@ -232,7 +232,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                 {
                     // In this example, the order is routed to the first order feed in the list of valid order feeds.
                     // You should use the order feed that is appropriate for your purposes.
-                    SpreadLegDetails spreadlegDetails = new SpreadLegDetails(instrument.Key, instrument.GetValidOrderFeeds()[0].ConnectionKey);
+                    SpreadLegDetails spreadlegDetails = new SpreadLegDetails(instrument, instrument.GetValidOrderFeeds()[0].ConnectionKey);
                     if (m_spreadLegKeys[1].Equals(instrument))
                     {
                         spreadlegDetails.SpreadRatio = m_Ratio1;
@@ -340,7 +340,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
 
                 if (m_orderKey == "")
                 {
-                    // In this example, the order is submitted to ASE-A.
+          
                     // You should use the order feed that is appropriate for your purposes.
                     AutospreaderSyntheticOrderProfile op = new AutospreaderSyntheticOrderProfile(this.GetOrderFeedByName(e.Fields.Instrument, m_ASEGateway),
                         (AutospreaderInstrument)e.Fields.Instrument);
@@ -511,7 +511,7 @@ namespace TTAPI_Sample_Console_ASEOrderRouting
                     // Shutdown the TT API
                     if (m_apiInstance != null)
                     {
-                        m_apiInstance.Shutdown();
+                        TTAPI.Shutdown(); 
                         m_apiInstance = null;
                     }
 
