@@ -7,9 +7,9 @@ namespace ASG_Tools
 { 
     using TradingTechnologies.TTAPI;
 
-    public class ASG
+    public static class ASG
     {
-        public MarketKey mkt(string market)
+        public static MarketKey mkt(string market)
         {
             switch (market.ToUpper())
             {
@@ -22,7 +22,7 @@ namespace ASG_Tools
             }
         }
 
-        public ProductType prodtype(string pt)
+        public static ProductType prodtype(string pt)
         {
             switch (pt.ToUpper())
             {
